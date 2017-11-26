@@ -101,7 +101,6 @@ void Stack<ValType>::Push(ValType d)
 		temp = new ValType[Elements + MAX_VECTOR_SIZE];
 		for (int i = 0; i < Elements; i++)
 			temp[i] = pMem[i];
-//		temp[Elements] = d;
 		delete[] pMem;
 		pMem = temp;
 		Elements += MAX_VECTOR_SIZE;

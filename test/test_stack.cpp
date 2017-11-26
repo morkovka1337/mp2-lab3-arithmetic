@@ -21,8 +21,6 @@ TEST(TStack, throws_when_create_stack_with_negative_length)
 TEST(Stack, can_not_delete_if_stack_is_empty)
 {
 	Stack<int> st(1);
-	//st.Push(1);
-	//st.Clean();
 	ASSERT_ANY_THROW(st.Eject());
 }
 
@@ -91,16 +89,4 @@ TEST(Stack, can_check_for_completeness)
 	st.Push(2);
 	EXPECT_EQ(true, st.IsFull());
 }
-
-//TEST(Stack, can_return_the_number_of_elements)
-//{
-//	Stack<int> st(4);
-//	st.Push(1);
-//	st.Push(3);
-//	st.Push(1);
-//	st.Push(2);
-//	st.Clean();
-//
-//	EXPECT_EQ(true, st.IsEmpty());
-//}
 
