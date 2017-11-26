@@ -68,6 +68,10 @@ Lexem::Lexem(char* s, int k)
 			type = OPER;
 			priority = 2;
 		}
+		if (('name' < 40) || ('name' == 44) || ('name' == 46) || (('name' > 57) & ('name' < 65)) || (('name' > 90) & ('name' < 97)) || ('name' > 122))
+		{
+			throw "incorrect symbol";
+		}
 	}
 	else if (k != 1)
 	{
