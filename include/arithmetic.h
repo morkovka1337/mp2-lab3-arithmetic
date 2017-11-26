@@ -1,6 +1,7 @@
 // объ€вление функций и классов дл€ вычислени€ арифметических выражений
 
 #include <iostream>
+#include <string>
 #include "stack.h"
 
 using namespace std;
@@ -85,10 +86,37 @@ class Ariphmetic {
 	int Size;
 	int nLexems;
 public:
-	Ariphmetic(char* s);
+	Ariphmetic() { Size = 0; nLexems = 0; };
 	int check();
 	void PrintPolish();
 	void SetVar();
 	double calc();
+	Ariphmetic Str_To_Lexems(const string s);
 
+};
+Ariphmetic Ariphmetic::Str_To_Lexems(const string s)
+{
+	string opers = "+-*/";
+	string str;
+	int n = 0, i = 0;
+	Ariphmetic temp;
+	size_t OldPos, pos;
+	n = 0; OldPos = 0;
+	temp.Size = s.length();
+	pos = s.find_first_of(opers);
+	while (pos != s.npos)
+	{
+		if ((pos - OldPos) > 1)
+		{
+			str = s.substr(OldPos, pos - OldPos);
+			temp.pLexem[i] = str;
+			i++;
+		}
+		OldPos = pos + 1;
+		pos = s.find_first_of(opers, OldPos);
+	}
+	if (OldPos < s.length)
+	{
+		temp.pLexem[i] = s.substr(OldPos);
+	}
 };
