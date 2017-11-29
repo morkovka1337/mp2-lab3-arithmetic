@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "stack.h"
+#include <cctype>   // для функции isdigit
 
 using namespace std;
 enum LexType {LBr, RBr, VAR, VAL, OPER};
@@ -16,16 +17,17 @@ struct Lexem {
 	Lexem () {};
 	Lexem(char *s, LexType l) { strcpy(name, s), type = l; }
 	Lexem operator=(const Lexem & l) { strcpy(name, l.name); type = l.type; var = l.var; priority = l.priority; }
+	Lexem operator=(const string s) { var = 's'; }
 	void SetVar() { cout << "Enter value:" << endl; cin >> var; }
 	bool operator == (const Lexem &l) { if ((name != l.name) || (type != l.type) || (var != l.var) || (priority != l.priority)) return 0; else return 1; }
 
-	Lexem(char* s, int k);
+	void deftype(string s, int k);
 	
 };
 
-Lexem::Lexem(char* s, int k)
+void Lexem::deftype(string s, int k)
 {
-	strncpy(name, s, k);
+	strncpy(name, s.c_str(), k);
 	name[k] = '\0';
 
 	if (k == 1)
@@ -86,7 +88,7 @@ class Ariphmetic {
 	int Size;
 	int nLexems;
 public:
-	Ariphmetic() { Size = 0; nLexems = 0; };
+	Ariphmetic(int s = 0, int NL = 0) { Size = s; nLexems = NL; };
 	int check();
 	void PrintPolish();
 	void SetVar();
@@ -99,11 +101,27 @@ Ariphmetic Ariphmetic::Str_To_Lexems(const string s)
 	string opers = "+-*/";
 	string str;
 	int n = 0, i = 0;
-	Ariphmetic temp;
+	Ariphmetic temp (s.length());
 	size_t OldPos, pos;
-	n = 0; OldPos = 0;
-	temp.Size = s.length();
-	pos = s.find_first_of(opers);
+	n = 0; OldPos = 0, pos = 0;
+	while (s[pos] != '\0')
+	{
+		while (isdigit(s[pos]) && isdigit(s[pos + 1]))
+		{
+			pos++;
+		}
+		str = s.substr(OldPos, (pos + 1 - OldPos)); 
+		temp.pLexem[i] = str;
+		temp.pLexem[i].deftype(str, pos-OldPos + 1);
+		OldPos = pos;
+		pos++;
+		i++;
+		temp.nLexems = i;
+		str.empty();
+	}
+	return temp;
+	// идем по строке, режем каждый символ на лексемы; если текущий символ + 1 = число, то вырезаем из строки текущий + следующий
+	/*pos = s.find_first_of(opers);
 	while (pos != s.npos)
 	{
 		if ((pos - OldPos) > 1)
@@ -118,5 +136,5 @@ Ariphmetic Ariphmetic::Str_To_Lexems(const string s)
 	if (OldPos < s.length)
 	{
 		temp.pLexem[i] = s.substr(OldPos);
-	}
+	}*/
 };
