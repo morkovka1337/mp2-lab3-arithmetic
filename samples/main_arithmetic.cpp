@@ -1,6 +1,12 @@
 // реализация пользовательского приложения
 
+#include "arithmetic.h"
 int main()
 {
-  return 0;
+	string s = "22-2";
+	double res;
+	Arithmetic A(s);
+	A.PolishEntry();
+	res = A.Calc();
+	cout << res;
 }

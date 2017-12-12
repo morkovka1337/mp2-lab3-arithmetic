@@ -64,7 +64,6 @@ bool Stack<ValType>::IsEmpty()
 template <class ValType>
 void Stack<ValType>::Clean()
 {
-	//if (IsEmpty()) throw "stack is empty";
 	top = 0;
 }
 
@@ -108,7 +107,6 @@ void Stack<ValType>::Push(ValType d)
 	pMem[top] = d;
 	top += 1;
 }
-
 #endif
 
 
