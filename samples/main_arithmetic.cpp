@@ -8,5 +8,5 @@ int main()
 	Arithmetic A(s);
 	A.PolishEntry();
 	res = A.Calc();
-	cout << res;
+	cout << s << " = " << res << endl;
 }

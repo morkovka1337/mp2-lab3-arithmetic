@@ -158,19 +158,17 @@ void Arithmetic::Str_To_Lexems(const string s)
 }
 
 
-
 Arithmetic Arithmetic::PolishEntry()
 {
 	Arithmetic res(*this);
 	res.nLexems = 0;
+
 	Stack<Lexem> s1;
 	int k = 0;
-
 	for (int i = 0; i < nLexems; i++)
 	{
 		if ((pLexem[i].type == VAL) || (pLexem[i].type == VAR))
 			res += pLexem[i];
-
 		if (pLexem[i].type == LBr)
 		{
 			s1.Push(pLexem[i]);
@@ -212,6 +210,9 @@ Arithmetic Arithmetic::PolishEntry()
 
 	return res;
 }
+
+
+
 double Arithmetic::Calc()
 {
 	for (int i = 0; i < nLexems; i++)
@@ -237,20 +238,22 @@ double Arithmetic::Calc()
 		{
 			double A = s1.Eject();
 			double B = s1.Eject();
-			switch (pLexem[i].lexemstr[0])
+			string ls = pLexem[i].lexemstr;
+			if (ls == "+")
 			{
-			case '+':
 				res = A + B;
-				break;
-			case '-':
+			}
+			else if (ls == "+")
+			{
 				res = B - A;
-				break;
-			case '*':
+			}
+			else if (ls == "+")
+			{
 				res = A * B;
-				break;
-			case '/':
+			}
+			else if (ls == "+")
+			{
 				res = B / A;
-				break;
 			}
 			s1.Push(res);
 		}

@@ -39,11 +39,11 @@ struct Lexem {
 		int  temp = l.type;
 		if (lexemstr != l.lexemstr)
 			return false;
-		else if (temp = OPER && (type != l.type || priority != l.priority))
-			return false;
-		else if (temp = VAL && var != l.var)
-			return false;
-		else return true;
+		else if (temp = OPER && (type == l.type || priority == l.priority))
+			return true;
+		else if (temp = VAL && var == l.var)
+			return true;
+		else return false;
 	}
 	void deftype(const string s);
 };
@@ -60,7 +60,7 @@ class Arithmetic {
 public:
 	Arithmetic()
 	{
-		str[0] = 0;
+		str = "";
 		pLexem = 0;
 		nLexems = 0;
 	};
@@ -74,9 +74,7 @@ public:
 	void check(const string s);
 	int GetnLexems() { return nLexems; };
 	Arithmetic& operator +=(const Lexem a);
-	//void PrintPolish() {};
 	Arithmetic PolishEntry();
 	Lexem operator[] (int i);
 	double Calc();
-//	Arithmetic Str_To_Lexems(const string s);
 };
