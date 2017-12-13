@@ -1,28 +1,6 @@
 // реализация функций и классов для вычисления арифметических выражений
 #include "arithmetic.h"
-Lexem::Lexem(const char c)
-{
-	string opers = "(+-*/)";
-	char value = opers.find(c);
-	switch (c)
-	{
-	case '(':
-	{
-		type = LBr;
-		value = 0;
-		break;
-	}
-	case ')':
-	{
-		type = RBr;
-		value = 0;
-		break;
-	}
-	}
-	if (value > 0)
-		type = OPER;
-};
-void Lexem::deftype(string s)
+Lexem::Lexem(const string& s)
 {
 	lexemstr = s;
 	int k = s.length();
@@ -77,7 +55,87 @@ void Lexem::deftype(string s)
 		type = VAL;
 		var = stod(lexemstr);
 	}
+}
+
+
+Lexem::Lexem(const char c)
+{
+	string opers = "(+-*/)";
+	char value = opers.find(c);
+	switch (c)
+	{
+	case '(':
+	{
+		type = LBr;
+		value = 0;
+		break;
+	}
+	case ')':
+	{
+		type = RBr;
+		value = 0;
+		break;
+	}
+	}
+	if (value > 0)
+		type = OPER;
 };
+//void Lexem::deftype(string s)
+//{
+//	lexemstr = s;
+//	int k = s.length();
+//	if (k == 1)
+//	{
+//		if (isdigit(lexemstr[0]))
+//		{
+//			type = VAL;
+//			var = stod(lexemstr);
+//		}
+//		else if (isalpha(lexemstr[0]))
+//		{
+//			type = VAR;
+//		}
+//		else if (lexemstr == "(")
+//		{
+//			type = LBr;
+//			priority = 0;
+//		}
+//		else if (lexemstr == ")")
+//		{
+//			type = RBr;
+//			priority = 0;
+//		}
+//		else if (lexemstr == "+")
+//		{
+//			type = OPER;
+//			priority = 1;
+//		}
+//		else if (lexemstr == "-")
+//		{
+//			type = OPER;
+//			priority = 1;
+//		}
+//		else  if (lexemstr == "*")
+//		{
+//			type = OPER;
+//			priority = 2;
+//		}
+//		else if (lexemstr == "/")
+//		{
+//			type = OPER;
+//			priority = 2;
+//		}
+//		else
+//		{
+//			throw "incorrect symbol";
+//		}
+//	}
+//	else if (k > 1)
+//	{
+//		type = VAL;
+//		var = stod(lexemstr);
+//	}
+//};
 Arithmetic& Arithmetic::operator +=(const Lexem a)
 {
 	int size = this->GetnLexems();
@@ -85,6 +143,19 @@ Arithmetic& Arithmetic::operator +=(const Lexem a)
 	nLexems += 1;
 	return *this;
 }
+
+Arithmetic& Arithmetic::operator =(const Arithmetic & a)
+{
+	str = a.str;
+	nLexems = a.nLexems;
+
+	pLexem = new Lexem[nLexems];
+	for (int i = 0; i < nLexems; i++)
+		pLexem[i] = a.pLexem[i];
+
+	return (*this);
+}
+
 void Arithmetic::check(const string s)
 {
 	Arithmetic lex(s);
@@ -121,44 +192,101 @@ Lexem Arithmetic::operator[] (int i)
 {
 	return pLexem[i];
 }
-
-void Arithmetic::Str_To_Lexems(const string s)
+Arithmetic::Arithmetic(const string& s)
 {
-	string opers = "(+-*/)";
-	string str;
-	
-	for (int i = 0; i < s.length(); i++)
+	str = s;
+	pLexem = new Lexem[s.size()];
+	nLexems = 0;
+	//Str_To_Lexems(str);
+	int k = 0;
+	for (int i = 0; i < s.size(); i++)
 	{
-		char c = s[i];
-		if (opers.find(c) != string::npos) 
+		if (isdigit(s[i]))
 		{
-			pLexem[nLexems] = Lexem(c);
-			string s;
-			s[0] = c;
-			pLexem[nLexems].deftype(s);
-			nLexems++;
-		}
-		else if (isdigit(c)) 
-		{
+			int j = i; // конец числа
 			string v;
-			int j = i;
-			while ((j < s.length() && ((isdigit(s[j])) || (s[j] == '.'))))
+			while (isdigit(s[j]) || (s[j] == '.'))
 			{
-				j++;
+				if (s[j] != '/0')
+					j++;
 			}
 			v = s.substr(i, j - i);
-			if (v.length() > 0)
-			{
-				pLexem[nLexems] = Lexem(v, VAL);
-				pLexem[nLexems].deftype(v);
-				nLexems++;
-				i = j - 1;
-			}
+			pLexem[k] = Lexem(v);
+			k++;
+			i = j - 1;
 		}
-		else if (c != ' ')
-			throw "unable to divide";
+		else
+		{
+			pLexem[k] = Lexem(i);
+			k++;
+		}
 	}
-}
+	nLexems = k;
+	if (pLexem[0].lexemstr == "-" && ((pLexem[1].type == VAL) || pLexem[1].type == VAR))//унарный минус в начале строки
+	{
+		if (pLexem[1].type == VAR)
+			pLexem[1].SetVar();
+		pLexem[1].var = -pLexem[1].var;
+		for (int j = 1; j < nLexems - 1; j++)
+		{
+			pLexem[j] = pLexem[j + 1];
+		}
+		nLexems--;
+	}
+	for (int i = 0; i < nLexems - 3; i++) // унарный минус в виде (-a)
+	{
+		if ((pLexem[i].type == LBr) && (pLexem[i + 1].lexemstr == "-") && ((pLexem[i + 2].type == VAL) || pLexem[i + 2].type == VAR))
+		{
+			if (pLexem[1].type == VAR)
+				pLexem[1].SetVar();
+			pLexem[i + 2].var = 0 - pLexem[i + 2].var;
+			for (int j = i + 1; j < nLexems - 1; j++)
+			{
+				pLexem[j] = pLexem[j + 1];
+			}
+			nLexems--;
+		}
+	}
+};
+//
+//void Arithmetic::Str_To_Lexems(const string s)
+//{
+//	string opers = "(+-*/)";
+//	string str;
+//	
+//	for (int i = 0; i < s.length(); i++)
+//	{
+//		char c = s[i];
+//		if (opers.find(c) != string::npos) 
+//		{
+//			pLexem[nLexems] = Lexem(c);
+//			string s;
+//			s[0] = c;
+//			pLexem[nLexems].deftype(s);
+//			nLexems++;
+//		}
+//		else if (isdigit(c)) 
+//		{
+//			string v;
+//			int j = i;
+//			while ((j < s.length() && ((isdigit(s[j])) || (s[j] == '.'))))
+//			{
+//				j++;
+//			}
+//
+//			v = s.substr(i, j - i);
+//			if (v.length() > 0)
+//			{
+//				pLexem[nLexems] = Lexem(v, VAL);
+//				pLexem[nLexems].deftype(v);
+//				nLexems++;
+//				i = j - 1;
+//			}
+//		}
+//		else if (c != ' ')
+//			throw "unable to divide";
+//	}
+//}
 
 
 Arithmetic Arithmetic::PolishEntry()
@@ -209,8 +337,9 @@ Arithmetic Arithmetic::PolishEntry()
 	{
 		Lexem x = s1.Eject();
 		res += x;
-	}
-
+	} // возвращает только числа без операторов
+	for (int i = 0; i < res.nLexems; i++)
+		cout << "[pLexem[" << i + 1 << "]" << pLexem[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexem[i].type << "] " << "[var[" << i + 1 << "]" << pLexem[i].var << "] " << "[priority[" << i + 1 << "]" << pLexem[i].priority << "] " << endl;
 	return res;
 }
 

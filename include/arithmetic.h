@@ -23,7 +23,7 @@ struct Lexem {
 		priority = l.priority;
 	}
 	Lexem(const char c);
-	Lexem(const string& s, LexType l) { lexemstr = s; type = l; }
+	Lexem(const string& s);
 	Lexem& operator=(const Lexem & l) 
 	{ 
 		lexemstr = l.lexemstr; 
@@ -32,7 +32,7 @@ struct Lexem {
 		priority = l.priority; 
 		return *this; 
 	}
-	Lexem& operator=(const string &s) { lexemstr = s; deftype(s); return *this; }
+	Lexem& operator=(const string &s) { lexemstr = s; return *this; }
 	void SetVar() { cout << "Enter value:" << endl; cin >> var; }
 	bool operator == (const Lexem &l) 
 	{ 
@@ -44,8 +44,8 @@ struct Lexem {
 		else if (temp = VAL && var == l.var)
 			return true;
 		else return false;
-	}
-	void deftype(const string s);
+	}/*
+	void deftype(const string s);*/
 };
 
 
@@ -54,8 +54,8 @@ class Arithmetic {
 	string str;
 	Lexem* pLexem;
 	int nLexems;
-
-	void Str_To_Lexems(const string s);
+/*
+	void Str_To_Lexems(const string s);*/
 
 public:
 	Arithmetic()
@@ -64,41 +64,11 @@ public:
 		pLexem = 0;
 		nLexems = 0;
 	};
-	Arithmetic(const string& s) 
-	{
-		str = s;
-		pLexem = new Lexem[s.size()];
-		nLexems = 0;
-		Str_To_Lexems(str);
-		if (pLexem[0].lexemstr == "-" && ((pLexem[1].type == VAL) || pLexem[1].type == VAR))//унарный минус в начале строки
-		{
-			if (pLexem[1].type == VAR)
-				pLexem[1].SetVar();
-			pLexem[1].var = -pLexem[1].var;
-			for (int j = 1; j < nLexems - 1; j++)
-			{
-				pLexem[j] = pLexem[j + 1];
-			}
-			nLexems--;
-		}
-		for (int i = 0; i < nLexems - 3; i++) // унарный минус в виде (-a)
-		{
-			if ((pLexem[i].type == LBr) && (pLexem[i + 1].lexemstr == "-") && ((pLexem[i + 2].type == VAL)|| pLexem[i+2].type == VAR))
-			{
-				if (pLexem[1].type == VAR)
-					pLexem[1].SetVar();
-				pLexem[i + 2].var = 0 - pLexem[i + 2].var;
-				for (int j = i + 1; j < nLexems - 1; j++)
-				{
-					pLexem[j] = pLexem[j + 1];
-				}
-				nLexems--;
-			}
-		}
-	};
+	Arithmetic(const string& s);
 	void check(const string s);
 	int GetnLexems() { return nLexems; };
 	Arithmetic& operator +=(const Lexem a);
+	Arithmetic& operator =(const Arithmetic & a);
 	Arithmetic PolishEntry();
 	Lexem operator[] (int i);
 	double Calc();
