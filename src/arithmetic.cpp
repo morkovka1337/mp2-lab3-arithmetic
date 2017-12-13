@@ -143,11 +143,14 @@ void Arithmetic::Str_To_Lexems(const string s)
 			string v;
 			int j = i;
 			while ((j < s.length() && ((isdigit(s[j])) || (s[j] == '.'))))
+			{
 				j++;
+			}
 			v = s.substr(i, j - i);
 			if (v.length() > 0)
 			{
 				pLexem[nLexems] = Lexem(v, VAL);
+				pLexem[nLexems].deftype(v);
 				nLexems++;
 				i = j - 1;
 			}

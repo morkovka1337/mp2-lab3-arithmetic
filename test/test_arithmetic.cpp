@@ -70,8 +70,9 @@ TEST(Arithmetic, can_divide_into_lexemes_2)
 
 TEST(Arithmetic, can_calc)
 {
-	Arithmetic temp("223+a");
-	double exp = 223.0;
+	string s = "223+5";
+	Arithmetic temp(s);// верно определяется количество лексем, но строка содержит только 1 число?
+	double exp = 223.0; // не присваивается значение по строке^?
 	double res = temp.Calc();
 	EXPECT_EQ(exp, res);
 

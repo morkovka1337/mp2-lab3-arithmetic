@@ -70,6 +70,31 @@ public:
 		pLexem = new Lexem[s.size()];
 		nLexems = 0;
 		Str_To_Lexems(str);
+		if (pLexem[0].lexemstr == "-" && ((pLexem[1].type == VAL) || pLexem[1].type == VAR))//унарный минус в начале строки
+		{
+			if (pLexem[1].type == VAR)
+				pLexem[1].SetVar();
+			pLexem[1].var = -pLexem[1].var;
+			for (int j = 1; j < nLexems - 1; j++)
+			{
+				pLexem[j] = pLexem[j + 1];
+			}
+			nLexems--;
+		}
+		for (int i = 0; i < nLexems - 3; i++) // унарный минус в виде (-a)
+		{
+			if ((pLexem[i].type == LBr) && (pLexem[i + 1].lexemstr == "-") && ((pLexem[i + 2].type == VAL)|| pLexem[i+2].type == VAR))
+			{
+				if (pLexem[1].type == VAR)
+					pLexem[1].SetVar();
+				pLexem[i + 2].var = 0 - pLexem[i + 2].var;
+				for (int j = i + 1; j < nLexems - 1; j++)
+				{
+					pLexem[j] = pLexem[j + 1];
+				}
+				nLexems--;
+			}
+		}
 	};
 	void check(const string s);
 	int GetnLexems() { return nLexems; };
