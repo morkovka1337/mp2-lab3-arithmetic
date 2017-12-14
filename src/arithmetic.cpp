@@ -79,66 +79,34 @@ Lexem::Lexem(const char c)
 	}
 	if (value > 0)
 		type = OPER;
+	lexemstr = c;
+
+	if (lexemstr == "(")
+	{
+		priority = 0;
+	}
+	else if (lexemstr == "+")
+	{
+		priority = 1;
+	}
+	else if (lexemstr == "-")
+	{
+		priority = 1;
+	}
+	else  if (lexemstr == "*")
+	{
+		priority = 2;
+	}
+	else if (lexemstr == "/")
+	{
+		priority = 2;
+	}
+
 };
-//void Lexem::deftype(string s)
-//{
-//	lexemstr = s;
-//	int k = s.length();
-//	if (k == 1)
-//	{
-//		if (isdigit(lexemstr[0]))
-//		{
-//			type = VAL;
-//			var = stod(lexemstr);
-//		}
-//		else if (isalpha(lexemstr[0]))
-//		{
-//			type = VAR;
-//		}
-//		else if (lexemstr == "(")
-//		{
-//			type = LBr;
-//			priority = 0;
-//		}
-//		else if (lexemstr == ")")
-//		{
-//			type = RBr;
-//			priority = 0;
-//		}
-//		else if (lexemstr == "+")
-//		{
-//			type = OPER;
-//			priority = 1;
-//		}
-//		else if (lexemstr == "-")
-//		{
-//			type = OPER;
-//			priority = 1;
-//		}
-//		else  if (lexemstr == "*")
-//		{
-//			type = OPER;
-//			priority = 2;
-//		}
-//		else if (lexemstr == "/")
-//		{
-//			type = OPER;
-//			priority = 2;
-//		}
-//		else
-//		{
-//			throw "incorrect symbol";
-//		}
-//	}
-//	else if (k > 1)
-//	{
-//		type = VAL;
-//		var = stod(lexemstr);
-//	}
-//};
-Arithmetic& Arithmetic::operator +=(const Lexem a)
+
+Arithmetic& Arithmetic::operator +=(const Lexem& a)
 {
-	int size = this->GetnLexems();
+	int size = nLexems;
 	pLexem[size] = a;
 	nLexems += 1;
 	return *this;
@@ -196,8 +164,10 @@ Arithmetic::Arithmetic(const string& s)
 {
 	str = s;
 	pLexem = new Lexem[s.size()];
+	pLexemPolish = new Lexem[s.size()];
+	nLexemsPolish = 0;
+
 	nLexems = 0;
-	//Str_To_Lexems(str);
 	int k = 0;
 	for (int i = 0; i < s.size(); i++)
 	{
@@ -217,7 +187,7 @@ Arithmetic::Arithmetic(const string& s)
 		}
 		else
 		{
-			pLexem[k] = Lexem(i);
+			pLexem[k] = Lexem(s[i]);
 			k++;
 		}
 	}
@@ -248,75 +218,46 @@ Arithmetic::Arithmetic(const string& s)
 		}
 	}
 };
-//
-//void Arithmetic::Str_To_Lexems(const string s)
-//{
-//	string opers = "(+-*/)";
-//	string str;
-//	
-//	for (int i = 0; i < s.length(); i++)
-//	{
-//		char c = s[i];
-//		if (opers.find(c) != string::npos) 
-//		{
-//			pLexem[nLexems] = Lexem(c);
-//			string s;
-//			s[0] = c;
-//			pLexem[nLexems].deftype(s);
-//			nLexems++;
-//		}
-//		else if (isdigit(c)) 
-//		{
-//			string v;
-//			int j = i;
-//			while ((j < s.length() && ((isdigit(s[j])) || (s[j] == '.'))))
-//			{
-//				j++;
-//			}
-//
-//			v = s.substr(i, j - i);
-//			if (v.length() > 0)
-//			{
-//				pLexem[nLexems] = Lexem(v, VAL);
-//				pLexem[nLexems].deftype(v);
-//				nLexems++;
-//				i = j - 1;
-//			}
-//		}
-//		else if (c != ' ')
-//			throw "unable to divide";
-//	}
-//}
 
 
-Arithmetic Arithmetic::PolishEntry()
+Arithmetic::Arithmetic(const Arithmetic& a)
 {
-	Arithmetic res(*this);
-	res.nLexems = 0;
+	str = a.str;
+	nLexems = a.nLexems;
+	nLexemsPolish = a.nLexemsPolish;
+	pLexem = new Lexem[nLexems];
+	for (int i = 0; i < nLexems; i++)
+		pLexem[i] = a.pLexem[i];
+	pLexemPolish = new Lexem[nLexemsPolish];
+	for (int i = 0; i < nLexemsPolish; i++)
+		pLexemPolish[i] = a.pLexemPolish[i];
+}
 
+void  Arithmetic::PolishEntry()
+{
+	for (int i = 0; i < nLexems; i++)
+		cout << "[pLexem[" << i + 1 << "]" << pLexem[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexem[i].type << "] " << "[var[" << i + 1 << "]" << pLexem[i].var << "] " << "[priority[" << i + 1 << "]" << pLexem[i].priority << "] " << endl;
+	// сделать void?
 	Stack<Lexem> s1;
-	int k = 0;
 	for (int i = 0; i < nLexems; i++)
 	{
 		if ((pLexem[i].type == VAL) || (pLexem[i].type == VAR))
-			res += pLexem[i];
+			pLexemPolish[nLexemsPolish++] = pLexem[i];
 		if (pLexem[i].type == LBr)
 		{
-			s1.Push(pLexem[i]);
+			s1.Push(pLexemPolish[i]);
 		}
-
 		if (pLexem[i].type == OPER)
 		{
 			if (s1.IsEmpty())
 				s1.Push(pLexem[i]);
 			else
 			{
-				Lexem x = s1.Top();
-				while (!s1.IsEmpty() && (x.priority >= pLexem[i].priority))
+				Lexem x;
+				while (!s1.IsEmpty() && (s1.Top().priority > pLexem[i].priority))
 				{
 					x = s1.Eject();
-					res += x;
-					x = s1.Top();
+					pLexemPolish[nLexemsPolish++] = x; 
 				}
 				s1.Push(pLexem[i]);
 			}
@@ -327,7 +268,7 @@ Arithmetic Arithmetic::PolishEntry()
 			Lexem x = s1.Eject();
 			while (x.type != LBr)
 			{
-				res += x;
+				pLexemPolish[nLexemsPolish++] = x;
 				x = s1.Eject();
 			}
 		}
@@ -336,57 +277,56 @@ Arithmetic Arithmetic::PolishEntry()
 	while (!s1.IsEmpty())
 	{
 		Lexem x = s1.Eject();
-		res += x;
-	} // возвращает только числа без операторов
-	for (int i = 0; i < res.nLexems; i++)
-		cout << "[pLexem[" << i + 1 << "]" << pLexem[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexem[i].type << "] " << "[var[" << i + 1 << "]" << pLexem[i].var << "] " << "[priority[" << i + 1 << "]" << pLexem[i].priority << "] " << endl;
-	return res;
+		pLexemPolish[nLexemsPolish++] = x;
+	} 
+	for (int i = 0; i < nLexemsPolish; i++)
+		cout << "[pLexem[" << i + 1 << "]" << pLexemPolish[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexemPolish[i].type << "] " << "[var[" << i + 1 << "]" << pLexemPolish[i].var << "] " << "[priority[" << i + 1 << "]" << pLexemPolish[i].priority << "] " << endl;
 }
 
 
 
 double Arithmetic::Calc()
 {
-	for (int i = 0; i < nLexems; i++)
+	for (int i = 0; i < nLexemsPolish; i++)
 	{
-		if (pLexem[i].type == VAR)
+		if (pLexemPolish[i].type == VAR)
 		{
-			pLexem[i].SetVar();
-			pLexem[i].type = VAL;
+			pLexemPolish[i].SetVar();
+			pLexemPolish[i].type = VAL;
 		}
 	}
 
 	Stack<double> s1;
 	double res = 0.0;
 
-	for (int i = 0; i < nLexems; i++)
+	for (int i = 0; i < nLexemsPolish; i++)
 	{
-		if (pLexem[i].type == VAL)
+		if (pLexemPolish[i].type == VAL)
 		{
-			s1.Push(pLexem[i].var);
+			s1.Push(pLexemPolish[i].var);
 		}
-
-		if (pLexem[i].type == OPER)
+		if (pLexemPolish[i].type == OPER)
 		{
 			double A = s1.Eject();
 			double B = s1.Eject();
-			string ls = pLexem[i].lexemstr;
+			string ls = pLexemPolish[i].lexemstr;
 			if (ls == "+")
 			{
 				res = A + B;
 			}
-			else if (ls == "+")
+			else if (ls == "-")
 			{
 				res = B - A;
 			}
-			else if (ls == "+")
+			else if (ls == "*")
 			{
 				res = A * B;
 			}
-			else if (ls == "+")
+			else if (ls == "/")
 			{
 				res = B / A;
 			}
+			cout << res << endl;
 			s1.Push(res);
 		}
 	}

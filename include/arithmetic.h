@@ -54,22 +54,27 @@ class Arithmetic {
 	string str;
 	Lexem* pLexem;
 	int nLexems;
+
+	Lexem* pLexemPolish;
+	int nLexemsPolish;
 /*
 	void Str_To_Lexems(const string s);*/
 
 public:
-	Arithmetic()
+	Arithmetic(int k = 0)
 	{
 		str = "";
-		pLexem = 0;
+		if (k > 0)
+			pLexem = new Lexem[k];
 		nLexems = 0;
 	};
+	Arithmetic(const Arithmetic& a);
 	Arithmetic(const string& s);
 	void check(const string s);
 	int GetnLexems() { return nLexems; };
-	Arithmetic& operator +=(const Lexem a);
+	Arithmetic& operator +=(const Lexem& a);
 	Arithmetic& operator =(const Arithmetic & a);
-	Arithmetic PolishEntry();
+	void PolishEntry();
 	Lexem operator[] (int i);
 	double Calc();
 };

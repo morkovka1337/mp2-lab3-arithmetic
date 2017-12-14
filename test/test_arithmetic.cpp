@@ -6,32 +6,28 @@
 TEST(Lexem, can_define_type_of_lexem_1)
 {
 	string s = "11";
-	Lexem L;
-	/*L.deftype(s);*/
+	Lexem L(s);
 	EXPECT_EQ(L.var, 11);
 	EXPECT_EQ(L.type, 3);
 }
 TEST(Lexem, can_define_type_of_lexem_2)
 {
 	string s = "1";
-	Lexem L;/*
-	L.deftype(s);*/
+	Lexem L(s);
 	EXPECT_EQ(L.var, 1);
 	EXPECT_EQ(L.type, 3);
 }
 TEST(Lexem, can_define_type_of_lexem_3)
 {
 	string s = "+";
-	Lexem L;/*
-	L.deftype(s);*/
+	Lexem L(s);
 	EXPECT_EQ(L.type, 4);
 	EXPECT_EQ(L.priority, 1);
 }
 TEST(Lexem, can_define_type_of_lexem_4)
 {
 	string s = "b";
-	Lexem L;/*
-	L.deftype(s);*/
+	Lexem L(s);
 	EXPECT_EQ(L.type, 2);
 }
 //TEST(Lexem, can_define_type_of_lexem_5)
@@ -70,9 +66,11 @@ TEST(Arithmetic, can_divide_into_lexemes_2)
 
 TEST(Arithmetic, can_calc)
 {
-	string s = "223+5";
-	Arithmetic temp(s);// верно определяется количество лексем, но строка содержит только 1 число?
-	double exp = 223.0; // не присваивается значение по строке^?
+	//string s = "22+3/5*2-4";
+	string s = "1+2+3";
+	Arithmetic temp(s);
+	temp.PolishEntry();// верно определяется количество лексем, но строка содержит только 1 число?
+	double exp = 6.0; //  25.0; // не присваивается значение по строке^?
 	double res = temp.Calc();
 	EXPECT_EQ(exp, res);
 

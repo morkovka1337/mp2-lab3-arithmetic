@@ -3,7 +3,7 @@
 #include "arithmetic.h"
 int main()
 {
-	string s = "22+3";
+	string s = "(22+3)*21+34*4/3";
 	double res;
 	Arithmetic A(s);
 	A.PolishEntry();
