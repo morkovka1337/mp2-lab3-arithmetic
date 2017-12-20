@@ -83,10 +83,11 @@ ValType Stack<ValType>::Eject()
 {
 	ValType temp;
 	if (IsEmpty()) throw "stack is empty";
-	if (!IsEmpty())
+	else
 	{
-		temp = pMem[top - 1];
-		top -= 1;
+		//temp = pMem[top - 1];
+		temp = pMem[top-1];
+		top--;
 	}
 	return temp;
 }
@@ -105,7 +106,7 @@ void Stack<ValType>::Push(ValType d)
 		Elements += MAX_VECTOR_SIZE;
 	}
 	pMem[top] = d;
-	top += 1;
+	top++;
 }
 #endif
 

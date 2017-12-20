@@ -6,13 +6,14 @@
 #include <cctype>   // для функции isdigit
 
 using namespace std;
-enum LexType {LBr, RBr, VAR, VAL, OPER};
+enum LexType {LBr, RBr, VAR, VAL, OPER, UNKOWN};
 
 struct Lexem {
 	string lexemstr;
 	LexType type;
 	double var;
 	int priority;
+	bool value_is_entered;
 
 	Lexem() { lexemstr = "";  }
 	Lexem(const Lexem & l)
@@ -21,6 +22,7 @@ struct Lexem {
 		type = l.type;
 		var = l.var;
 		priority = l.priority;
+		value_is_entered = l.value_is_entered;
 	}
 	Lexem(const char c);
 	Lexem(const string& s);
@@ -30,22 +32,22 @@ struct Lexem {
 		type = l.type; 
 		var = l.var; 
 		priority = l.priority; 
+		value_is_entered = l.value_is_entered;
 		return *this; 
 	}
-	Lexem& operator=(const string &s) { lexemstr = s; return *this; }
-	void SetVar() { cout << "Enter value:" << endl; cin >> var; }
+//	Lexem& operator=(const string &s) { lexemstr = s; return *this; }
+	void SetVar() { cout << "Enter value of " << (this)->lexemstr << " :" << endl; cin >> var; }
 	bool operator == (const Lexem &l) 
 	{ 
 		int  temp = l.type;
 		if (lexemstr != l.lexemstr)
 			return false;
-		else if (temp = OPER && (type == l.type || priority == l.priority))
+		else if (temp == OPER && (type == l.type || priority == l.priority))
 			return true;
-		else if (temp = VAL && var == l.var)
+		else if (temp == VAL && var == l.var)
 			return true;
 		else return false;
-	}/*
-	void deftype(const string s);*/
+	}
 };
 
 
@@ -57,9 +59,6 @@ class Arithmetic {
 
 	Lexem* pLexemPolish;
 	int nLexemsPolish;
-/*
-	void Str_To_Lexems(const string s);*/
-
 public:
 	Arithmetic(int k = 0)
 	{
@@ -70,11 +69,12 @@ public:
 	};
 	Arithmetic(const Arithmetic& a);
 	Arithmetic(const string& s);
-	void check(const string s);
+	bool check();
 	int GetnLexems() { return nLexems; };
 	Arithmetic& operator +=(const Lexem& a);
 	Arithmetic& operator =(const Arithmetic & a);
 	void PolishEntry();
+	Lexem GetPolishLex(int i);
 	Lexem operator[] (int i);
 	double Calc();
 };

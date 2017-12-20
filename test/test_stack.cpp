@@ -39,7 +39,6 @@ TEST(Stack, can_get_quantity)
 	Stack<int> st(10);
 	for (int i = 0; i<4; i++)
 		st.Push(i);
-
 	EXPECT_EQ(4, st.GetSize());
 }
 
@@ -60,7 +59,6 @@ TEST(Stack, can_push_elem2)
 	st.Push(2);
 	st.Push(3);
 	st.Push(4);
-
 	ASSERT_NO_THROW(st.Push(4));
 }
 

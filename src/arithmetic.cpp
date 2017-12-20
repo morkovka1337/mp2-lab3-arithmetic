@@ -23,85 +23,92 @@ Lexem::Lexem(const string& s)
 		else if (lexemstr == ")")
 		{
 			type = RBr;
-			priority = 0;
+			priority = 1;
 		}
 		else if (lexemstr == "+")
 		{
 			type = OPER;
-			priority = 1;
+			priority = 2;
 		}
 		else if (lexemstr == "-")
 		{
 			type = OPER;
-			priority = 1;
+			priority = 2;
 		}
 		else  if (lexemstr == "*")
 		{
 			type = OPER;
-			priority = 2;
+			priority = 3;
 		}
 		else if (lexemstr == "/")
 		{
 			type = OPER;
-			priority = 2;
+			priority = 3;
 		}
 		else
 		{
-			throw "incorrect symbol";
+			type = UNKOWN;
 		}
 	}
 	else if (k > 1)
 	{
 		type = VAL;
-		var = stod(lexemstr);
+		var = (double)stod(lexemstr);
 	}
 }
 
 
 Lexem::Lexem(const char c)
 {
-	string opers = "(+-*/)";
-	char value = opers.find(c);
 	switch (c)
 	{
 	case '(':
 	{
 		type = LBr;
-		value = 0;
+		priority = 0;
 		break;
 	}
 	case ')':
 	{
 		type = RBr;
-		value = 0;
+		priority = 1;
+		break;
+	}
+	case '+':
+	{
+		type = OPER;
+		priority = 2;
+		break;
+	}
+	case '-':
+	{
+		type = OPER;
+		priority = 2;
+		break;
+	}
+	case '*':
+	{
+		type = OPER;
+		priority = 3;
+		break;
+	}
+	case '/':
+	{
+		type = OPER;
+		priority = 3;
 		break;
 	}
 	}
-	if (value > 0)
-		type = OPER;
 	lexemstr = c;
-
-	if (lexemstr == "(")
+	if (isdigit(c))
 	{
-		priority = 0;
+		type = VAL;
+		var = stod(lexemstr);
 	}
-	else if (lexemstr == "+")
+	else if (isalpha(c))
 	{
-		priority = 1;
+		type = VAR;
 	}
-	else if (lexemstr == "-")
-	{
-		priority = 1;
-	}
-	else  if (lexemstr == "*")
-	{
-		priority = 2;
-	}
-	else if (lexemstr == "/")
-	{
-		priority = 2;
-	}
-
 };
 
 Arithmetic& Arithmetic::operator +=(const Lexem& a)
@@ -116,44 +123,56 @@ Arithmetic& Arithmetic::operator =(const Arithmetic & a)
 {
 	str = a.str;
 	nLexems = a.nLexems;
-
+	nLexemsPolish = a.nLexemsPolish;
 	pLexem = new Lexem[nLexems];
 	for (int i = 0; i < nLexems; i++)
 		pLexem[i] = a.pLexem[i];
+	pLexemPolish = new Lexem[nLexemsPolish];
+	for (int i = 0; i < nLexemsPolish; i++)
+		pLexemPolish[i] = a.pLexemPolish[i];
 
 	return (*this);
 }
 
-void Arithmetic::check(const string s)
+bool Arithmetic::check()
 {
-	Arithmetic lex(s);
-	int k, p;
-	for (int i = 0; i < lex.nLexems; i++)
+	int k = 0, p = 0;
+	for (int i = 0; i < nLexems; i++)
 	{
-		if (lex.pLexem[i].type == LBr) k++;
-		if (lex.pLexem[i].type == RBr) p++;
+		if (pLexem[i].type == LBr) k++;
+		if (pLexem[i].type == RBr) p++;
 	}
-	if (((lex.pLexem[0].type == VAL) || (lex.pLexem[0].type == LBr)) && ((lex.pLexem[nLexems - 1].type == VAL) || (lex.pLexem[nLexems - 1].type == RBr)) && (p = k))
-	{
-		for (int i = 0; i < (nLexems - 1); i++)
-			switch (lex.pLexem[i].type)
-			{
-			case VAL:
-				if ((lex.pLexem[i + 1].type != RBr) || (lex.pLexem[i + 1].type != OPER))
-					throw "StringError";
-			case OPER:
-				if ((lex.pLexem[i + 1].type != VAL) || (lex.pLexem[i + 1].type != RBr))
-					throw "StringError";
-			case LBr:
-				if ((lex.pLexem[i + 1].type != VAL) || (lex.pLexem[i + 1].type != RBr))
-					throw "StringError";
-			case RBr:
-				if ((lex.pLexem[i + 1].type != RBr) || (lex.pLexem[i + 1].type != OPER))
-					throw "StringError";
-			}
-	}
-	else
-		throw "StringError";
+	if (k != p) return false;
+	if ((!((pLexem[0].type == VAL)||(pLexem[0].type == VAR) || (pLexem[0].type == LBr))) || (!((pLexem[nLexems-1].type == VAL) || (pLexem[nLexems-1].type == VAR) || (pLexem[nLexems-1].type == RBr))))
+		return false;
+	for (int i = 0; i < (nLexems - 1); i++)
+		switch (pLexem[i].type)
+		{
+		case VAL:
+			if (!((pLexem[i + 1].type == RBr) || (pLexem[i + 1].type == OPER)))
+				return false; // после числа только закрывающая скобка или оператор
+			break;
+		case VAR:
+			if (!((pLexem[i + 1].type == RBr) || (pLexem[i + 1].type == OPER)))
+				return false; // после переменной только закрывающая скобка или оператор
+			break;
+		case OPER:
+			if (!((pLexem[i + 1].type == VAL) || (pLexem[i + 1].type == VAR) || (pLexem[i + 1].type == LBr)))
+				return false; // после оператора только число, переменная или открывающая скобка
+			break;
+		case LBr:
+			if (!((pLexem[i + 1].type == VAL) || (pLexem[i + 1].type == VAR) || (pLexem[i + 1].type == LBr)))
+				return false; // после открывающей скобки только число, переменная или открывающая скобка
+			break;
+		case RBr:
+			if (!((pLexem[i + 1].type == RBr) || (pLexem[i + 1].type == OPER)))
+				return false; // после закрывающей скобки только закрывающая или оператор
+			break;
+		case UNKOWN:
+			return false;
+			break;
+		}
+	return true;
 }
 
 Lexem Arithmetic::operator[] (int i)
@@ -164,7 +183,7 @@ Arithmetic::Arithmetic(const string& s)
 {
 	str = s;
 	pLexem = new Lexem[s.size()];
-	pLexemPolish = new Lexem[s.size()];
+	//pLexemPolish = new Lexem[s.size()];
 	nLexemsPolish = 0;
 
 	nLexems = 0;
@@ -177,7 +196,7 @@ Arithmetic::Arithmetic(const string& s)
 			string v;
 			while (isdigit(s[j]) || (s[j] == '.'))
 			{
-				if (s[j] != '/0')
+				if (s[j] != '\0')
 					j++;
 			}
 			v = s.substr(i, j - i);
@@ -192,29 +211,40 @@ Arithmetic::Arithmetic(const string& s)
 		}
 	}
 	nLexems = k;
-	if (pLexem[0].lexemstr == "-" && ((pLexem[1].type == VAL) || pLexem[1].type == VAR))//унарный минус в начале строки
+
+	if ((pLexem[0].lexemstr == "-") && ((pLexem[1].type == VAL) || pLexem[1].type == VAR))//унарный минус в начале строки
 	{
-		if (pLexem[1].type == VAR)
-			pLexem[1].SetVar();
-		pLexem[1].var = -pLexem[1].var;
-		for (int j = 1; j < nLexems - 1; j++)
-		{
-			pLexem[j] = pLexem[j + 1];
-		}
-		nLexems--;
+		nLexems++;
+		Lexem* pLexemTemp;
+		pLexemTemp = new Lexem[nLexems];
+		pLexemTemp[0].type = VAL;
+		pLexemTemp[0].var = 0.0;
+		pLexemTemp[0].lexemstr = "0";
+		for (int i = 1; i < nLexems; i++)
+			pLexemTemp[i] = pLexem[i - 1];
+		delete[] pLexem;
+		pLexem = new Lexem[nLexems];
+		for (int i = 0; i < nLexems; i++)
+			pLexem[i] = pLexemTemp[i];
 	}
-	for (int i = 0; i < nLexems - 3; i++) // унарный минус в виде (-a)
+	for (int i = 0; i < nLexems - 3; i++) // унарный минус в виде (-a
 	{
 		if ((pLexem[i].type == LBr) && (pLexem[i + 1].lexemstr == "-") && ((pLexem[i + 2].type == VAL) || pLexem[i + 2].type == VAR))
 		{
-			if (pLexem[1].type == VAR)
-				pLexem[1].SetVar();
-			pLexem[i + 2].var = 0 - pLexem[i + 2].var;
-			for (int j = i + 1; j < nLexems - 1; j++)
-			{
-				pLexem[j] = pLexem[j + 1];
-			}
-			nLexems--;
+			nLexems++;
+			Lexem* pLexemTemp;
+			pLexemTemp = new Lexem[nLexems];
+			for (int j = 0; j < i+1; j++)
+				pLexemTemp[j] = pLexem[j];
+
+			pLexemTemp[i + 1].type = VAL;
+			pLexemTemp[i + 1].var = 0.0;
+			pLexemTemp[i + 1].lexemstr = "0";
+
+			for (int j = i+1; j < nLexems - 1; j++)
+				pLexemTemp[j+1] = pLexem[j];
+			delete[] pLexem;
+			pLexem = pLexemTemp;
 		}
 	}
 };
@@ -233,54 +263,64 @@ Arithmetic::Arithmetic(const Arithmetic& a)
 		pLexemPolish[i] = a.pLexemPolish[i];
 }
 
-void  Arithmetic::PolishEntry()
+void Arithmetic::PolishEntry()
 {
 	for (int i = 0; i < nLexems; i++)
-		cout << "[pLexem[" << i + 1 << "]" << pLexem[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexem[i].type << "] " << "[var[" << i + 1 << "]" << pLexem[i].var << "] " << "[priority[" << i + 1 << "]" << pLexem[i].priority << "] " << endl;
-	// сделать void?
+		cout << "pLexem[" << i + 1 << "]" << pLexem[i].lexemstr << endl;
+	pLexemPolish = new Lexem[nLexems];
 	Stack<Lexem> s1;
 	for (int i = 0; i < nLexems; i++)
 	{
 		if ((pLexem[i].type == VAL) || (pLexem[i].type == VAR))
-			pLexemPolish[nLexemsPolish++] = pLexem[i];
+		{
+			pLexemPolish[nLexemsPolish] = pLexem[i];
+			nLexemsPolish++;
+		}
 		if (pLexem[i].type == LBr)
 		{
-			s1.Push(pLexemPolish[i]);
+			s1.Push(pLexem[i]);
+		}
+		if (pLexem[i].type == RBr)
+		{
+			//Lexem x = s1.Eject();
+			while ((s1.Top().type != LBr) && (!s1.IsEmpty())) // после первого оператора помещает пустую лексему, остальные смещаются на 1;
+			{
+				pLexemPolish[nLexemsPolish] = s1.Eject();
+				//cout << "nLexemsPolish " << nLexemsPolish << endl;
+				nLexemsPolish++;
+				//x = s1.Eject();
+			}
+			s1.Eject();
 		}
 		if (pLexem[i].type == OPER)
 		{
-			if (s1.IsEmpty())
+			if ((s1.IsEmpty()) || (pLexem[i].priority > s1.Top().priority))
 				s1.Push(pLexem[i]);
 			else
 			{
-				Lexem x;
-				while (!s1.IsEmpty() && (s1.Top().priority > pLexem[i].priority))
+				while ((!s1.IsEmpty()) && (s1.Top().priority >= pLexem[i].priority))
 				{
-					x = s1.Eject();
-					pLexemPolish[nLexemsPolish++] = x; 
+					pLexemPolish[nLexemsPolish] = s1.Eject(); 
+					nLexemsPolish++;
 				}
 				s1.Push(pLexem[i]);
 			}
 		}
 
-		if (pLexem[i].type == RBr)
-		{
-			Lexem x = s1.Eject();
-			while (x.type != LBr)
-			{
-				pLexemPolish[nLexemsPolish++] = x;
-				x = s1.Eject();
-			}
-		}
+		
 	}
-
 	while (!s1.IsEmpty())
 	{
-		Lexem x = s1.Eject();
-		pLexemPolish[nLexemsPolish++] = x;
+		pLexemPolish[nLexemsPolish] = s1.Eject();
+		nLexemsPolish++;
 	} 
 	for (int i = 0; i < nLexemsPolish; i++)
-		cout << "[pLexem[" << i + 1 << "]" << pLexemPolish[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexemPolish[i].type << "] " << "[var[" << i + 1 << "]" << pLexemPolish[i].var << "] " << "[priority[" << i + 1 << "]" << pLexemPolish[i].priority << "] " << endl;
+		cout << "[pLexemPolish[" << i + 1 << "]" << pLexemPolish[i].lexemstr << "] " << "[type[" << i + 1 << "]" << pLexemPolish[i].type << "] " << "[var[" << i + 1 << "]" << pLexemPolish[i].var << "] " << "[priority[" << i + 1 << "]" << pLexemPolish[i].priority << "] " << endl;
+}
+
+Lexem Arithmetic::GetPolishLex(int i)
+{
+	return pLexemPolish[i];
 }
 
 
@@ -293,12 +333,20 @@ double Arithmetic::Calc()
 		{
 			pLexemPolish[i].SetVar();
 			pLexemPolish[i].type = VAL;
+			pLexemPolish[i].value_is_entered = true;
+			for (int j = i; j < nLexemsPolish; j++)
+				if ((pLexemPolish[j].type == VAR) && (pLexemPolish[j].lexemstr == pLexemPolish[i].lexemstr))
+				{
+					pLexemPolish[j].var = pLexemPolish[i].var;
+					pLexemPolish[j].value_is_entered = true;
+					pLexemPolish[j].type = VAL;
+				}
 		}
 	}
 
 	Stack<double> s1;
 	double res = 0.0;
-
+	//cout << nLexemsPolish << endl;
 	for (int i = 0; i < nLexemsPolish; i++)
 	{
 		if (pLexemPolish[i].type == VAL)
@@ -326,7 +374,7 @@ double Arithmetic::Calc()
 			{
 				res = B / A;
 			}
-			cout << res << endl;
+			//cout << res << endl;
 			s1.Push(res);
 		}
 	}
